@@ -104,7 +104,7 @@ async function replyText(message) {
 async function processCommandText({ sessionId, question }) {
   // 清理历史会话
   if (question === '/clear') {
-    await Message.where({ sessionId }).remove()
+    await Message.where({ sessionId }).remove({ multi: true })
     return CLEAR_MESSAGE;
   } else {
     return HELP_MESSAGE;
@@ -129,7 +129,7 @@ async function buildOpenAIPrompt(sessionId, question) {
     // 如果历史会话记录大于 OPENAI_MAX_TOKEN 或 两次会话间隔超过 10 分钟，则停止添加历史会话
     const timeSinceLastMessage = lastMessageTime ? lastMessageTime - message.createdAt : 0;
     if (tokenSize > OPENAI_MAX_TOKEN || timeSinceLastMessage > ADJACENT_MESSAGE_MAX_INTERVAL) {
-      await Message.where({}).remove()
+      await Message.where({}).remove({ multi: true })
       break
     }
 
