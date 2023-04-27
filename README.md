@@ -312,6 +312,10 @@ export async function main(event, context) {
 
 启用成功之后就可以在公众号对话框与ChatGPT对话啦，快去试试吧！附在下公众号，点击关注即可体验！
 
+![欢迎关注体验](https://files.mdnice.com/user/24883/d549421c-6c0e-4239-896b-044bd7667604.png)
+
+![](https://files.mdnice.com/user/24883/cadf58b4-6c6c-435b-b5d0-e6c9a8678024.jpg)
+
 
 
 
