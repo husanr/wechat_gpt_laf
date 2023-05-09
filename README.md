@@ -148,8 +148,9 @@ async function replyText(message) {
     sessionId
   }).orderBy("createdAt", "desc").getOne();
 
+  console.log("获取上下文",res)
+
   const parentId = res?.data?.parentMessageId
-  const conId = res?.data?.conversationId
 
 
   // 发送指令
@@ -158,7 +159,7 @@ async function replyText(message) {
   }
 
   // 获取 OpenAI 回复内容
-  const { error, answer, parentMessageId, conversationId } = await getOpenAIReply(question, parentId, conId);
+  const { error, answer, parentMessageId } = await getOpenAIReply(question, parentId);
   if (error) {
     console.error(`sessionId: ${sessionId}; question: ${question}; error: ${error}`);
     return error;
@@ -166,33 +167,44 @@ async function replyText(message) {
 
   // 将消息保存到数据库中
   const token = question.length + answer.length;
-  const result = await Message.add({ token, answer, parentMessageId, conversationId, ...message });
+  const result = await Message.add({ token, answer, parentMessageId, ...message });
   console.debug(`[save message] result: ${result}`);
 
   return answer;
 }
 
 // 获取 OpenAI API 的回复
-async function getOpenAIReply(question, parentId, conId) {
+async function getOpenAIReply(question, parentId) {
 
   const { ChatGPTAPI } = await import('chatgpt')
-
-  const api = new ChatGPTAPI({ apiKey: OPENAI_KEY })
+  let api = cloud.shared.get('api')
+  if (!api) {
+    api = new ChatGPTAPI({ apiKey: OPENAI_KEY })
+    cloud.shared.set('api', api)
+  }
 
   try {
     // 如果有上下文 id，就带上
     let res;
 
-    if (parentId && conId) {
-      res = await api.sendMessage(question, { conversationId: conId, parentMessageId: parentId })
+    if (parentId) {
+      console.log("parid", parentId)
+      res = await api.sendMessage(question, { parentMessageId: parentId })
     } else {
       res = await api.sendMessage(question)
     }
+    console.log(res)
+    
     // 返回 OpenAI 回复的内容及上下文 id
-    return { answer: res.text.replace("\n\n", ""), parentMessageId: res.parentMessageId, conversationId: res.conversationId }
+    return { answer: res.text.replace("\n\n", ""), parentMessageId: res.parentMessageId }
 
   } catch (e) {
     console.log(e)
+    if (e.statusCode === 429) {
+      return {
+        error: '问题太多了，我有点眩晕，请稍后再试'
+      }
+    }
     return {
       error: "问题太难了 出错了. (uДu〃).",
     }
@@ -233,7 +245,6 @@ async function processCommandText({ sessionId, question }) {
     return HELP_MESSAGE;
   }
 }
-
 ```
 注意： 
 1. `token`要与微信公众号中设置一致
