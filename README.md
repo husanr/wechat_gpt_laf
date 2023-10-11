@@ -1,6 +1,6 @@
 # 使用Laf云平台，两步将ChatGPT接入微信公众号
 
-最新代码地址： https://husanr.github.io/views/ChatGPT/wechat
+最新代码地址： https://husanr.cloud/views/ChatGPT/wechat
 
 **最近很火**的`ChatGPT`可以说已经满大街可见了，到处都有各种各样的体验地址，有收费的也有免费的，总之是五花八门、花里胡哨。
 
